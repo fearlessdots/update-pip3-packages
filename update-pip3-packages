@@ -10,7 +10,7 @@ PACKAGES=$(pip3 list | awk '{print $1}' | sed '1d;2d')
 PACKAGES_NUMBER=$(pip3 list | awk '{print $1}' | sed '1d;2d' | wc -l)
 
 # Control variable
-i=0
+i=1
 
 echo "[  PIP Updater  ] $PACKAGES_NUMBER packages were found"
 
