@@ -28,5 +28,6 @@ do
 	#sleep 0.2
 done
 
+echo ""
 echo "[  PIP Updater  ] Finished updating PIP packages"
 exit 0
