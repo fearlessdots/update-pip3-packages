@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if ! dpkg -l python3-pip > /dev/null 2>&1
+then
+	echo "[  PIP Updater  ] Python3-pip package not found"
+	exit 1
+fi
+
+PACKAGES=$(pip3 list | awk '{print $1}' | sed '1d;2d')
+PACKAGES_NUMBER=$(pip3 list | awk '{print $1}' | sed '1d;2d' | wc -l)
+
+# Control variable
+i=0
+
+echo "[  PIP Updater  ] $PACKAGES_NUMBER packages were found"
+
+for package in $PACKAGES
+do
+	echo ""
+	echo "[  PIP Updater  ] Updating $package ($i out of $PACKAGES_NUMBER)"
+	#sleep 0.2
+	pip3 install --upgrade $package
+	if [ ! $? -eq 0 ]
+	then
+		echo "[  PIP Updater  ] An error occurred updating package: $package"
+	fi
+	((i++))
+	#sleep 0.2
+done
+
+echo "[  PIP Updater  ] Finished updating PIP packages"
+exit 0
