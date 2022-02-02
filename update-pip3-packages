@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Configuration variables
-OUTPUT_FILE='requirements.txt'
-
 #
 ##
 #
@@ -16,6 +13,10 @@ finish_program(){
 	exit $1
 }
 
+show_error(){
+	echo "[  Error  ] $(tput setaf 1)$1$(tput sgr0)"
+}
+
 #
 ##
 #
@@ -23,26 +24,29 @@ finish_program(){
 # Verify if PIP is installed
 if ! (which pip) > /dev/null 2>&1
 then
-	show_info "PIP was not found"
+	show_error "PIP was not found"
 	finish_program 1
 fi
 
-# Upgrade pip package
-show_info "Upgrading PIP"
-python3 -m pip install --upgrade pip
+# Get installed packages
+PACKAGES=$(pip3 list | awk '{print $1}' | sed '1d;2d')
+PACKAGES_NUMBER=$(pip3 list | awk '{print $1}' | sed '1d;2d' | wc -l)
+show_info "$PACKAGES_NUMBER packages were found."
 
-# Redirect the list of installed packages to a file in the current working directory
-show_info "Writing a list of installed packages to $OUTPUT_FILE"
-pip freeze > $OUTPUT_FILE
+# Control variable
+i=0
 
-# Replace the '==' with '>='
-sed -i 's/==/>=/g' $OUTPUT_FILE
-
-# Update all packages in the file
-show_info "Updating Python packages"
-pip install -r $OUTPUT_FILE --upgrade
-
-# Delete output file
-rm $OUTPUT_FILE
+# Upgrade packages
+for package in $PACKAGES
+do
+	echo ""
+	show_info "$(tput setaf 2)Updating $package$(tput sgr0) $(tput setaf 4)($i out of $PACKAGES_NUMBER)$(tput sgr0)"
+	pip install --upgrade $package
+	if [ ! $? -eq 0 ]
+	then
+		show_error "An error occurred when trying to update $package package"
+	fi
+	((i++))
+done
 
 finish_program 0
