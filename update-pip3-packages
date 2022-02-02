@@ -1,33 +1,48 @@
 #!/bin/bash
 
-if ! dpkg -l python3-pip > /dev/null 2>&1
+# Configuration variables
+OUTPUT_FILE='requirements.txt'
+
+#
+##
+#
+
+show_info(){
+	echo "[  UpdatePythonPackages  ] $1"
+}
+
+finish_program(){
+	show_info "Finishing program..."
+	exit $1
+}
+
+#
+##
+#
+
+# Verify if PIP is installed
+if ! (which pip) > /dev/null 2>&1
 then
-	echo "[  PIP Updater  ] Python3-pip package not found"
-	exit 1
+	show_info "PIP was not found"
+	finish_program 1
 fi
 
-PACKAGES=$(pip3 list | awk '{print $1}' | sed '1d;2d')
-PACKAGES_NUMBER=$(pip3 list | awk '{print $1}' | sed '1d;2d' | wc -l)
+# Upgrade pip package
+show_info "Upgrading PIP"
+python3 -m pip install --upgrade pip
 
-# Control variable
-i=1
+# Redirect the list of installed packages to a file in the current working directory
+show_info "Writing a list of installed packages to $OUTPUT_FILE"
+pip freeze > $OUTPUT_FILE
 
-echo "[  PIP Updater  ] $PACKAGES_NUMBER packages were found"
+# Replace the '==' with '>='
+sed -i 's/==/>=/g' $OUTPUT_FILE
 
-for package in $PACKAGES
-do
-	echo ""
-	echo "[  PIP Updater  ] Updating $package ($i out of $PACKAGES_NUMBER)"
-	#sleep 0.2
-	pip3 install --upgrade $package
-	if [ ! $? -eq 0 ]
-	then
-		echo "[  PIP Updater  ] An error occurred updating package: $package"
-	fi
-	((i++))
-	#sleep 0.2
-done
+# Update all packages in the file
+show_info "Updating Python packages"
+pip install -r $OUTPUT_FILE --upgrade
 
-echo ""
-echo "[  PIP Updater  ] Finished updating PIP packages"
-exit 0
+# Delete output file
+rm $OUTPUT_FILE
+
+finish_program 0
