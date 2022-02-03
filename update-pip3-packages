@@ -34,7 +34,7 @@ PACKAGES_NUMBER=$(pip3 list | awk '{print $1}' | sed '1d;2d' | wc -l)
 show_info "$PACKAGES_NUMBER packages were found."
 
 # Control variable
-i=0
+i=1
 
 # Upgrade packages
 for package in $PACKAGES
